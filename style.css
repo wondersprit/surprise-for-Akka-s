@@ -1,0 +1,60 @@
+body {
+    font-family: 'Baloo 2', 'Pacifico', Arial, sans-serif;
+    background: #f9f7fc;
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 600px;
+    margin: auto;
+    padding: 10px;
+}
+@media (max-width: 600px) {
+    .container {
+        padding: 4px;
+    }
+    h1, h2 {
+        font-size: 1.3em;
+    }
+    .gallery-slideshow img {
+        width: 95vw;
+        max-width: 100%;
+        height: auto;
+    }
+}
+.option-label {
+    font-weight: bold;
+    margin-right: 8px;
+    color: #0099b8;
+    font-family: 'Baloo 2', 'Pacifico', cursive, Arial, sans-serif;
+}
+.hidden {
+    display: none !important;
+}
+.quiz-section, .gallery-slideshow, .heartfelt {
+    margin: 16px 0;
+}
+.big-btn {
+    font-family: 'Pacifico', cursive;
+    font-size: 1.4em;
+    background: linear-gradient(90deg,#ffb6b9,#fbc2eb,#a1c4fd);
+    color: #b8005a;
+    border: none;
+    border-radius: 16px;
+    padding: 18px 48px;
+    box-shadow: 0 4px 16px #ffe6e6;
+    cursor: pointer;
+    transition: transform 0.16s, box-shadow 0.2s;
+    margin-bottom: 16px;
+}
+.big-btn:hover {
+    transform: scale(1.07);
+    box-shadow: 0 6px 24px #ffd6e0;
+}
+.back-home {
+    display: inline-block;
+    margin-top: 18px;
+    color: #0099b8;
+    text-decoration: none;
+    font-weight: bold;
+}
