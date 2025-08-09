@@ -1,0 +1,143 @@
+// ---- Configuration: Your images and music for each Akka ----
+const akkas = {
+  kowsi: {
+    displayName: "Kowsi Akka",
+    minigameImg: "biscuits theif.jpg", // Minigame character image
+    diaryImgs: [
+      "kowsi akka birthday.jpg",
+      "kowsi akka my fav pic.jpg",
+      "my chella akka's.jpg",
+      "pic for surprice homepage.jpg"
+    ],
+    music: "for kowsi akka.mp3",
+    heartfelt: `Inakiku en chella akka ooda special day aana, en akka enaku eppavum special thaan 😌💕 Happy birthday thangapullaw! Life long sirichukite happy aa iru 🥰🥰🥰💕💕🫂`,
+  },
+  sneha: {
+    displayName: "Sneha Akka",
+    minigameImg: "biscuits theif.jpg",
+    diaryImgs: [
+      "akka and me.jpg",
+      "akka teasing me.jpg",
+      "dairymilk moment 2.jpg",
+      "dairymilk moment.jpg",
+      "flower crown for sneha akka.jpg",
+      "sleeping.jpg",
+      "teasing while playing games.jpg"
+    ],
+    music: "for sneha akka.mp3",
+    heartfelt: `Oii periya valu 😄 nee enaku romba rombaaa rombaaaaa special 💕 En life la kadicha first akka – special akka forever and ever 😘 Love you sooo soooooo soooooooooo much akka maa 💕💕🫂`,
+  }
+};
+
+// ---- App State ----
+let currentAkka = null;
+let mainContent = document.getElementById("main-content");
+
+// ---- Navigation ----
+window.startGame = function(akkaKey) {
+  currentAkka = akkas[akkaKey];
+  mainContent.innerHTML = ""; // clear previous content
+  stopMusic();
+  showMinigame();
+};
+
+// ---- Minigame ----
+function showMinigame() {
+  let score = 0;
+  let maxScore = 10;
+  let gameDiv = document.createElement("div");
+  gameDiv.className = "game-area";
+  gameDiv.innerHTML = `
+    <h2>${currentAkka.displayName} Minigame 🎮</h2>
+    <p class="game-score">Score: <span id="scoreVal">0</span> / ${maxScore}</p>
+    <img src="${currentAkka.minigameImg}" alt="Game Character" class="game-character" id="gameChar">
+    <p>Bonk the biscuit thief! Tap/click as fast as you can 🥳</p>
+    <button class="back-btn" onclick="goBackHome()">Back to Home</button>
+  `;
+  mainContent.appendChild(gameDiv);
+
+  let charImg = gameDiv.querySelector("#gameChar");
+  charImg.onclick = () => {
+    score++;
+    document.getElementById("scoreVal").textContent = score;
+    charImg.style.transform = "scale(1.18)";
+    setTimeout(()=> charImg.style.transform = "scale(1)", 120);
+    if (score >= maxScore) {
+      setTimeout(showPhotoDiary, 600);
+    }
+  };
+}
+
+// ---- Photo Diary (Swipeable Gallery) ----
+function showPhotoDiary() {
+  mainContent.innerHTML = "";
+  let diaryDiv = document.createElement("div");
+  diaryDiv.className = "photo-diary";
+  diaryDiv.innerHTML = `
+    <h2>${currentAkka.displayName} Photo Diary 📸</h2>
+    <div class="photo-gallery" id="gallery"></div>
+    <div class="photo-count" id="photoCount"></div>
+    <button class="back-btn" onclick="goBackHome()">Back to Home</button>
+  `;
+  mainContent.appendChild(diaryDiv);
+
+  let idx = 0;
+  function renderGallery() {
+    let gallery = diaryDiv.querySelector("#gallery");
+    gallery.innerHTML = `
+      <button class="gallery-nav-btn gallery-prev" ${idx==0?"disabled":""}>&lt;</button>
+      <img src="${currentAkka.diaryImgs[idx]}" class="gallery-img" alt="Diary Pic">
+      <button class="gallery-nav-btn gallery-next" ${idx==currentAkka.diaryImgs.length-1?"disabled":""}>&gt;</button>
+    `;
+    diaryDiv.querySelector("#photoCount").textContent = 
+      `Photo ${idx+1} of ${currentAkka.diaryImgs.length}`;
+    gallery.querySelector(".gallery-prev").onclick = () => { if(idx>0){idx--;renderGallery();} };
+    gallery.querySelector(".gallery-next").onclick = () => { if(idx<currentAkka.diaryImgs.length-1){idx++;renderGallery();} };
+    if(idx === currentAkka.diaryImgs.length-1){
+      setTimeout(showHeartfelt, 700);
+    }
+  }
+  renderGallery();
+}
+
+// ---- Heartfelt Message ----
+function showHeartfelt() {
+  mainContent.innerHTML = "";
+  playMusic(currentAkka.music);
+  let heartfeltDiv = document.createElement("div");
+  heartfeltDiv.className = "heartfelt-section";
+  heartfeltDiv.innerHTML = `
+    <div class="heartfelt-title">💖 For ${currentAkka.displayName}:</div>
+    <div class="heartfelt-message">${currentAkka.heartfelt}</div>
+    <div class="music-player">
+        <audio src="${currentAkka.music}" autoplay controls loop></audio>
+    </div>
+    <button class="back-btn" onclick="goBackHome()">Back to Home</button>
+  `;
+  mainContent.appendChild(heartfeltDiv);
+}
+
+// ---- Home Navigation ----
+window.goBackHome = function() {
+  window.location.reload();
+};
+
+// ---- Music Controls ----
+function playMusic(src) {
+  let bgMusic = document.getElementById("bg-music");
+  if(bgMusic) {
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+    bgMusic.src = src;
+    bgMusic.play();
+  }
+}
+function stopMusic() {
+  let bgMusic = document.getElementById("bg-music");
+  if(bgMusic) {
+    bgMusic.pause();
+    bgMusic.currentTime = 0;
+    bgMusic.src = "for lobby.mp3";
+    bgMusic.play();
+  }
+}
