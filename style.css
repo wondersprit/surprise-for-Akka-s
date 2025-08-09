@@ -1,0 +1,10 @@
+/* ...other CSS above... */
+
+.option-label {
+    font-weight: bold;
+    margin-right: 8px;
+    color: #0099b8;
+    font-family: 'Baloo 2', 'Pacifico', cursive, Arial, sans-serif;
+}
+
+/* ...other CSS below... */
