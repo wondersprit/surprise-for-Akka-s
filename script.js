@@ -94,7 +94,7 @@ function runQuiz(sectionId, quizData, onComplete) {
     showQuestion();
 }
 
-// --- Kowsi Cake Game (One Button, All Candles, Firecrackers, Birthday Popup!) ---
+// --- Kowsi Cake Game ---
 function showCakeGameKowsi() {
     // Create full darkness overlay
     let overlay = document.createElement('div');
@@ -103,8 +103,7 @@ function showCakeGameKowsi() {
         position:fixed;top:0;left:0;width:100vw;height:100vh;
         background:rgba(0,0,0,0.97);
         z-index:9999;pointer-events:none;
-        transition:opacity 1.1s;
-        display:flex;align-items:center;justify-content:center;
+        transition:opacity 1.2s;
     `;
     document.body.appendChild(overlay);
 
@@ -114,6 +113,7 @@ function showCakeGameKowsi() {
     section.innerHTML = `
         <div class="cake-zone" style="text-align:center;">
             <svg id="cake-svg" width="100%" height="320" viewBox="0 0 420 320" style="max-width:340px;margin:auto;display:block;">
+                <!-- Cake layers and sprinkles (same as before) -->
                 <ellipse cx="210" cy="290" rx="100" ry="18" fill="#d2b48c" opacity="0.44"/>
                 <ellipse cx="210" cy="220" rx="110" ry="36" fill="#f8c471"/>
                 <rect x="100" y="110" width="220" height="110" fill="#f8c471"/>
@@ -121,6 +121,7 @@ function showCakeGameKowsi() {
                 <rect x="100" y="140" width="220" height="45" fill="#fff0fa"/>
                 <ellipse cx="210" cy="140" rx="85" ry="26" fill="#fffde4"/>
                 <rect x="125" y="70" width="170" height="70" fill="#fffde4"/>
+                <!-- Sprinkles -->
                 <ellipse cx="160" cy="115" rx="7" ry="3" fill="#d72660"/>
                 <ellipse cx="210" cy="107" rx="6" ry="2.5" fill="#a3e635"/>
                 <ellipse cx="255" cy="124" rx="8" ry="2.5" fill="#00bcd4"/>
@@ -130,6 +131,7 @@ function showCakeGameKowsi() {
                 <ellipse cx="145" cy="125" rx="5" ry="2" fill="#ffd700"/>
                 <ellipse cx="225" cy="113" rx="5" ry="1.6" fill="#99e6ff"/>
                 <text x="210" y="210" font-size="2.2em" fill="#b8005a" text-anchor="middle" font-family="Baloo 2, cursive">（｡♥‿♥｡）</text>
+                <!-- Candles -->
                 <g id="candles">
                     ${[...Array(10)].map((_,i)=>{
                         const cakeLeft = 130, cakeRight = 290, candleWidth = 12;
@@ -146,81 +148,50 @@ function showCakeGameKowsi() {
                 </g>
             </svg>
         </div>
-        <div id="cake-firecrackers"></div>
     `;
 
-    // Button on darkness overlay
-    let lightBtn = document.createElement('button');
-    lightBtn.id = "light-candles-btn";
-    lightBtn.innerHTML = "🎉 Light Candles!";
-    lightBtn.style.cssText = `
-        font-size:1.3em;
-        padding: 0.7em 2em;
-        border-radius: 32px;
-        background: linear-gradient(90deg,#fbc2eb,#ffd6e0,#fffde4);
-        color: #b8005a;
-        font-family: 'Pacifico',cursive;
-        font-weight: bold;
-        border: none;
-        box-shadow: 0 2px 18px #d7266055;
-        animation: btnpop 1.2s;
-        cursor:pointer;
-        z-index:10000;
-    `;
-    overlay.appendChild(lightBtn);
+    const candles = section.querySelectorAll('.candle');
+    let lit = Array(10).fill(false);
 
-    // Animate the button popping up
-    styleBtnAnim();
-
-    lightBtn.onclick = () => {
-        lightBtn.disabled = true;
-        lightBtn.style.opacity = "0.4";
-        lightAllCandles();
-    };
-
-    function lightAllCandles() {
-        const candles = section.querySelectorAll('.candle');
-        candles.forEach((candle, idx) => {
-            setTimeout(()=>{
+    candles.forEach((candle, idx) => {
+        candle.addEventListener('click', () => {
+            if (!lit[idx]) {
+                lit[idx] = true;
+                // Animate flame appearance
                 let flame = candle.querySelector('.candle-flame');
                 flame.setAttribute('rx', '5');
                 flame.setAttribute('ry', '8');
                 flame.style.opacity = "1";
-                candle.querySelector('.candle-body').style.filter = "drop-shadow(0 0 10px #ffd966)";
-                candle.style.transform = "scale(1.17)";
+                // Animate candle (scale up)
+                candle.querySelector('.candle-body').style.filter = "drop-shadow(0 0 8px #ffd966)";
+                candle.style.transform = "scale(1.13)";
                 setTimeout(()=>candle.style.transform = "",180);
-            }, idx*110);
+                updateDarkness();
+                checkAllLit();
+            }
         });
-        // Festival firecrackers!
-        launchFirecrackers();
-        // Fade overlay after candles lit
-        setTimeout(()=>{
-            overlay.style.opacity = "0";
-        }, 1400);
-        // Happy Birthday popup after darkness fades
-        setTimeout(()=>{
-            overlay.remove();
-            showBirthdayPopup();
-            setTimeout(showSlideshowKowsi, 2800);
-        }, 2200);
+        candle.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            candle.click();
+        });
+    });
+
+    function updateDarkness() {
+        let litCount = lit.filter(Boolean).length;
+        let ratio = litCount / candles.length;
+        overlay.style.opacity = (0.96 - ratio*0.93).toFixed(2);
     }
 
-    function launchFirecrackers() {
-        const container = document.getElementById('cake-firecrackers');
-        container.innerHTML = '';
-        for(let i=0;i<22;i++){
-            let fire = document.createElement('div');
-            fire.className = 'firecracker';
-            fire.style.left = (10+Math.random()*80)+'vw';
-            fire.style.top = (30+Math.random()*30)+'vh';
-            fire.style.background = firecrackerColor();
-            container.appendChild(fire);
-            setTimeout(()=>fire.remove(),1800);
+    function checkAllLit() {
+        if (lit.every(x => x)) {
+            overlay.style.opacity = "0";
+            setTimeout(()=>{
+                overlay.remove();
+                section.classList.add("hidden");
+                showBirthdayPopup();
+                setTimeout(showSlideshowKowsi, 2700);
+            }, 1600);
         }
-    }
-    function firecrackerColor() {
-        const arr = ["#ffb3ba","#ffd966","#baffc9","#bae1ff","#ffe6e6","#d72660","#fbc2eb","#fffde4"];
-        return arr[Math.floor(Math.random()*arr.length)];
     }
 
     function showBirthdayPopup() {
@@ -228,79 +199,19 @@ function showCakeGameKowsi() {
         msg.id = "birthday-msg";
         msg.innerHTML = "Happy Birthday Thangapullaw 🥰🥰💕💕💕🫂";
         msg.style.cssText = `
-            font-family:'Pacifico',cursive;font-size:2.1em;color:#fff7cc;
+            font-family:'Pacifico',cursive;font-size:2em;color:#fff7cc;
             text-shadow:0 2px 14px #d72660,0 0 16px #f8e71c;
-            opacity:0;transition:opacity 1.3s;position:fixed;z-index:2020;
+            opacity:0;transition:opacity 1.4s;position:fixed;z-index:2020;
             left:0;right:0;top:17vh;text-align:center;pointer-events:none;
         `;
         document.body.appendChild(msg);
         setTimeout(()=>{ msg.style.opacity = 1; }, 150);
         setTimeout(()=>{ msg.style.opacity = 0; }, 2200);
-        setTimeout(()=>{ msg.remove(); }, 2800);
+        setTimeout(()=>{ msg.remove(); }, 2700);
     }
 }
 
-// Animation for button pop and firecrackers
-function styleBtnAnim() {
-    if(document.getElementById('btnpopstyle')) return;
-    let style = document.createElement('style');
-    style.id = 'btnpopstyle';
-    style.innerHTML = `
-    @keyframes btnpop {
-        0% {transform:scale(0.7);opacity:0;}
-        40% {transform:scale(1.15);opacity:1;}
-        80% {transform:scale(0.97);}
-        100% {transform:scale(1);}
-    }
-    .firecracker {
-        position:fixed;width:20px;height:20px;border-radius:50%;
-        box-shadow:0 0 16px #fff;
-        opacity:0.85;
-        animation: firepop 1.5s cubic-bezier(.51,-0.01,.76,1.04) forwards;
-        z-index:2002;
-        pointer-events:none;
-    }
-    @keyframes firepop {
-        0% {transform: scale(0.7) translateY(0);}
-        40% {transform: scale(1.3) translateY(-60px);}
-        60% {transform: scale(1.1) translateY(-80px);}
-        100% {transform: scale(0.9) translateY(0); opacity:0;}
-    }
-    `;
-    document.head.appendChild(style);
-}
-
-// --- Kowsi Gallery Slideshow ---
-function showSlideshowKowsi() {
-    const sectionId = "diary-section-kowsi";
-    const galleryImgs = kowsiGallery;
-    const section = document.getElementById(sectionId);
-    if(!section) return;
-    section.classList.remove("hidden");
-    const img = document.getElementById('gallery-img-kowsi');
-    let idx = 0;
-    function showImg() {
-        img.src = galleryImgs[idx].src;
-        img.alt = galleryImgs[idx].alt;
-        img.classList.add('fadein');
-        setTimeout(()=>img.classList.remove('fadein'),1000);
-    }
-    showImg();
-    let intervalID = setInterval(()=>{
-        idx = (idx + 1) % galleryImgs.length;
-        showImg();
-        if(idx===0) {
-            clearInterval(intervalID);
-            setTimeout(()=>{
-                section.classList.add('hidden');
-                const msgSection = document.getElementById('message-section-kowsi');
-                if(msgSection) msgSection.classList.remove('hidden');
-            }, 1800);
-        }
-    }, 4000);
-}
-
-// --- Sneha Game ---
+// --- Sneha Whack-a-Mole Game ---
 function showSnehaWhackAMole() {
     const section = document.getElementById("game-section-sneha");
     if(!section) return;
@@ -398,6 +309,36 @@ function showSnehaWhackAMole() {
     }
 }
 
+// --- Kowsi Gallery Slideshow ---
+function showSlideshowKowsi() {
+    const sectionId = "diary-section-kowsi";
+    const galleryImgs = kowsiGallery;
+    const section = document.getElementById(sectionId);
+    if(!section) return;
+    section.classList.remove("hidden");
+    const img = document.getElementById('gallery-img-kowsi');
+    let idx = 0;
+    function showImg() {
+        img.src = galleryImgs[idx].src;
+        img.alt = galleryImgs[idx].alt;
+        img.classList.add('fadein');
+        setTimeout(()=>img.classList.remove('fadein'),1000);
+    }
+    showImg();
+    let intervalID = setInterval(()=>{
+        idx = (idx + 1) % galleryImgs.length;
+        showImg();
+        if(idx===0) {
+            clearInterval(intervalID);
+            setTimeout(()=>{
+                section.classList.add('hidden');
+                const msgSection = document.getElementById('message-section-kowsi');
+                if(msgSection) msgSection.classList.remove('hidden');
+            }, 1800);
+        }
+    }, 4000);
+}
+
 // --- Sneha Gallery Slideshow ---
 function showSlideshowSneha() {
     const sectionId = "diary-section-sneha";
@@ -468,6 +409,14 @@ style.innerHTML = `
     60% {opacity: 1;transform: scale(1.08) rotate(-2deg);}
     100% { opacity: 1; transform: scale(1);}
 }
+.confetti-piece {
+    animation: confetti-fall 2.1s cubic-bezier(.13,.82,.62,1.1) forwards;
+}
+@keyframes confetti-fall {
+    0% { transform: translateY(-50px) scale(1);}
+    70% {transform: translateY(260px) scale(1.09);}
+    100% {transform: translateY(350px) scale(0.7);}
+}
 .option-label {
     font-weight: bold;
     margin-right: 7px;
@@ -523,6 +472,11 @@ style.innerHTML = `
     0% { opacity:0; transform: scale(0.3);}
     30% { opacity:1; transform: scale(1.2);}
     100% { opacity:0; transform: scale(0.5);}
+}
+.cake-sparkle {
+    position: fixed; width:24px;height:24px; pointer-events:none; z-index:999;
+    background: radial-gradient(circle,#fff7cc 0%,#ffd6e0 80%, transparent 100%);
+    border-radius:50%; animation: sparkleAnim 1.1s;
 }
 `;
 document.head.appendChild(style);
